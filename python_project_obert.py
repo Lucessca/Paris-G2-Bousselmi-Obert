@@ -10,7 +10,7 @@ a="hello my team - I am Luc"
 b="hello my team - I am Matheo"
 c="hello my team - I am Quentin"
 d="hello my team - I am Martin"
-
-print(a,b,c,d,)
+e="hello my team - I am Benjamin"
+print(a,b,c,d,e)
 
 #modif
