@@ -14,3 +14,8 @@ e="hello my team - I am Benjamin"
 print(a,b,c,d,e)
 
 #modif
+# Create a dataset
+df = pd.DataFrame(np.random.random((10,10)), columns=["a","b","c","d","e","f","g","h","i","j"])
+
+# plot a heatmap with annotation
+sns.heatmap(df, cmap='rainbow', annot=True, annot_kws={"size": 7})
