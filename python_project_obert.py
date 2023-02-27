@@ -14,3 +14,16 @@ e="hello my team - I am Benjamin"
 print(a,b,c,d,e)
 
 #modif
+#Exercise2-----------------------------------Measuring Correlations-------------------
+# Create a dataset
+df = pd.DataFrame(np.random.random((100,5)), columns=["a","b","c","d","e"])
+ 
+# Calculate correlation between each pair of variable
+corr_matrix=df.corr()            # gives me matrix 5/5
+ 
+# plot it
+sns.heatmap(corr_matrix, cmap='PuOr')
+# cmap='PuOr' : for color option
+#Change it 
+# https://matplotlib.org/stable/gallery/color/colormap_reference.html
+sns.heatmap(corr_matrix, cmap='seismic')
