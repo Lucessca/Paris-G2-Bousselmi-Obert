@@ -97,15 +97,15 @@ print(MCD)
 
 
 # Isolate the adjusted closing prices
-adj_close_px = WMT[['Adj Close']]
+adj_close_px = MCD[['Adj Close']]
 # Calculate the moving average for aapl
 moving_avg = adj_close_px.rolling(window=40).mean()
 # Short moving window rolling mean
-WMT['42'] = adj_close_px.rolling(window=40).mean()
+MCD['42'] = adj_close_px.rolling(window=40).mean()
 # Long moving window rolling mean
-WMT['252'] = adj_close_px.rolling(window=252).mean()
+MCD['252'] = adj_close_px.rolling(window=252).mean()
 # Plot the adjusted closing price, the short and long windows of rolling means
-WMT[['Adj Close', '42', '252']].plot()
+MCD[['Adj Close', '42', '252']].plot()
  
 # Show plot
 plt.show()
