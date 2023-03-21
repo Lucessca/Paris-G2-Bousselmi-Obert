@@ -38,15 +38,15 @@ KO = pdr.get_data_yahoo('KO',
                           start=datetime(2013, 1, 1),  ##(yyyy, dd, mm)
                           end=datetime(2023, 1, 3))     ##(yyyy, dd, mm)
 # Isolate the adjusted closing prices
-adj_close_px = WMT[['Adj Close']]
+adj_close_px = KO[['Adj Close']]
 # Calculate the moving average for aapl
 moving_avg = adj_close_px.rolling(window=40).mean()
 # Short moving window rolling mean
-WMT['42'] = adj_close_px.rolling(window=40).mean()
+KO['42'] = adj_close_px.rolling(window=40).mean()
 # Long moving window rolling mean
-WMT['252'] = adj_close_px.rolling(window=252).mean()
+KO['252'] = adj_close_px.rolling(window=252).mean()
 # Plot the adjusted closing price, the short and long windows of rolling means
-WMT[['Adj Close', '42', '252']].plot()
+KO[['Adj Close', '42', '252']].plot()
  
 # Show plot
 plt.show()
@@ -58,15 +58,15 @@ SBUX = pdr.get_data_yahoo('SBUX',
                           start=datetime(2013, 1, 1),  ##(yyyy, dd, mm)
                           end=datetime(2023, 1, 3))     ##(yyyy, dd, mm)
 # Isolate the adjusted closing prices
-adj_close_px = WMT[['Adj Close']]
+adj_close_px = SBUX[['Adj Close']]
 # Calculate the moving average for aapl
 moving_avg = adj_close_px.rolling(window=40).mean()
 # Short moving window rolling mean
-WMT['42'] = adj_close_px.rolling(window=40).mean()
+SBUX['42'] = adj_close_px.rolling(window=40).mean()
 # Long moving window rolling mean
-WMT['252'] = adj_close_px.rolling(window=252).mean()
+SBUX['252'] = adj_close_px.rolling(window=252).mean()
 # Plot the adjusted closing price, the short and long windows of rolling means
-WMT[['Adj Close', '42', '252']].plot()
+SBUX[['Adj Close', '42', '252']].plot()
  
 # Show plot
 plt.show()
