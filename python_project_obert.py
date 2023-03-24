@@ -235,3 +235,13 @@ b = r - q
 print('Result is - Ex 14 - question3 - european  stock option with dividend "call" :')
 print(mygcall(s, k, r, b, sigma, t))
 # 13.56
+
+
+
+
+
+
+
+
+
+
