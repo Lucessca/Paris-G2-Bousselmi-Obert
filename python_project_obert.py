@@ -10,9 +10,11 @@ Created on Mon Feb 27 14:32:52 2023
 
 import pandas_datareader.data as pdr
 import yfinance as yf
-import numpy as np
-import scipy as si
 import matplotlib.pyplot as plt
+import scipy.stats as si
+import sympy as sy
+from scipy.stats import Normal, cdf
+import numpy as np
 yf.pdr_override()
 from datetime import datetime
 
