@@ -330,3 +330,7 @@ print('Result is - Generalized formula of B&S - call:')
 print(mygcall(s, k, r, b, sigma, t))
 print('Result is - Generalized formula of B&S - put:')
 print(mygput(s, k, r, b, sigma, t))
+
+
+# Isolate the `Adj Close` values and transform the DataFrame
+daily_close_px = all_data[['Adj Close']].reset_index().pivot('Date', 'Ticker', 'Adj Close')
