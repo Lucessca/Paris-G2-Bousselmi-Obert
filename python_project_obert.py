@@ -1,8 +1,17 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Thu Mar 30 10:28:27 2023
+
+@author: mathe
+"""
+
+
 import pandas_datareader.data as pdr
 import yfinance as yf
 import matplotlib.pyplot as plt
 import scipy.stats as si
 import numpy as np
+import pandas as pd
 yf.pdr_override()
 from datetime import datetime
 from datetime import date
@@ -229,6 +238,16 @@ def mygput(s, k, r, b, sigma, t):
 
 # print results
 
+print('Result is - Generalized formula of B&S - call:')
+print(mygcall(s, k, r, b, sigma, t))
+print('Result is - Generalized formula of B&S - put:')
+print(mygput(s, k, r, b, sigma, t))
+
+
+
+# Isolate the `Adj Close` values and transform the DataFrame
+daily_close_px = WMT[['Adj Close']].reset_index().pivot('Date', 'Ticker', 'Adj Close')
+
 
 
 
@@ -241,17 +260,17 @@ def mygput(s, k, r, b, sigma, t):
 #-----------------------------------------------------------------------------
 # Initialize the short and long windows
 short_window = 40
-long_window = 100
+long_window = 100 #--> MMA
 
 # Initialize the `signals` DataFrame with the `signal` column
-signals = pd.DataFrame(index=aapl.index)
+signals = pd.DataFrame(index=WMT.index)
 signals['signal'] = 0.0
 
 # Create short simple moving average over the short window
-signals['short_mavg'] = aapl['Close'].rolling(window=short_window, min_periods=1, center=False).mean()
+signals['short_mavg'] = WMT['Close'].rolling(window=short_window, min_periods=1, center=False).mean()
 
 # Create long simple moving average over the long window
-signals['long_mavg'] = aapl['Close'].rolling(window=long_window, min_periods=1, center=False).mean()
+signals['long_mavg'] = WMT['Close'].rolling(window=long_window, min_periods=1, center=False).mean()
 
 # Create signals
 signals['signal'][short_window:] = np.where(signals['short_mavg'][short_window:]
@@ -262,6 +281,16 @@ signals['positions'] = signals['signal'].diff()
 
 # Print `signals`
 print(signals)
+
+
+
+
+
+
+
+
+
+
 
 # Plot your signals - Exercise 9
 #-----------------------------------------------------------------------------
@@ -275,7 +304,7 @@ fig = plt.figure()
 ax1 = fig.add_subplot(111,  ylabel='Price in $')
 
 # Plot the closing price
-aapl['Close'].plot(ax=ax1, color='r', lw=2.)
+WMT['Close'].plot(ax=ax1, color='r', lw=2.)
 
 # Plot the short and long moving averages
 signals[['short_mavg', 'long_mavg']].plot(ax=ax1, lw=2.)
@@ -293,28 +322,104 @@ ax1.plot(signals.loc[signals.positions == -1.0].index,
 # Show the plot
 plt.show()
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#----------------------------------------------------------------------------------------------------------------#
+#    FINAL VERSION        PYTHON PROJECT
+#----------------------------------------------------------------------------------------------------------------#
+
+
+
+
+# Define list of tickers
+tickers = ['WMT', 'KO', 'SBUX', 'MCD']
+
+
+# Loop through tickers and retrieve data
+for ticker in tickers:
+    # Retrieve data
+    data = pdr.get_data_yahoo(ticker, start=datetime(2013, 1, 1), end=datetime(2023, 1, 3))
+        
+    # Calculate rolling means
+    adj_close_px = data[['Adj Close']]
+    data['42'] = adj_close_px.rolling(window=40).mean()
+    data['252'] = adj_close_px.rolling(window=252).mean()
+    
+    # Plot data
+    data[['Adj Close', '42', '252']].plot()
+    plt.title(ticker)
+    plt.show()
+    
+    # Print data
+    print(data)
+
+
+    # --- BACKTESTING --- #
+    # Create the signal column in the data table
+    data['signal'] = 0.0
+    
+    # Generate the signal
+    data['signal'][short_window:]=np.where(data['42'][short_window:]>data['252'][short_window:],1.0,0.0)
+    
+    # Inform on position
+    data['positions'] = data['signal'].diff()
+    
+    # Print signals
+    print(data['positions'])
+
+
+
+
+
 # Backtesting a trading strategy - Exercise 10
 #-----------------------------------------------------------------------------
 # Set the initial capital
 initial_capital= float(100000.0)
 
 # Create a DataFrame `positions`
-positions = pd.DataFrame(index=signals.index).fillna(0.0)
+positions = pd.DataFrame(index=data['signal'].index).fillna(0.0)
 
 # Buy a 100 shares
-positions['AAPL'] = 100*signals['signal']  
+positions['WMT'] = 100*data['signal']  
  
 # Initialize the portfolio with value owned  
-portfolio = positions.multiply(aapl['Adj Close'], axis=0)
+portfolio = positions.multiply(WMT['Adj Close'], axis=0)
 
 # Store the difference in shares owned
 pos_diff = positions.diff()
 
 # Add `holdings` to portfolio
-portfolio['holdings'] = (positions.multiply(aapl['Adj Close'], axis=0)).sum(axis=1)
+portfolio['holdings'] = (positions.multiply(WMT['Adj Close'], axis=0)).sum(axis=1)
 
 # Add `cash` to portfolio
-portfolio['cash'] = initial_capital - (pos_diff.multiply(aapl['Adj Close'], axis=0)).sum(axis=1).cumsum()  
+portfolio['cash'] = initial_capital - (pos_diff.multiply(WMT['Adj Close'], axis=0)).sum(axis=1).cumsum()  
 
 # Add `total` to portfolio
 portfolio['total'] = portfolio['cash'] + portfolio['holdings']
@@ -326,11 +431,15 @@ portfolio['returns'] = portfolio['total'].pct_change()
 print(portfolio.head())
 
 
-print('Result is - Generalized formula of B&S - call:')
-print(mygcall(s, k, r, b, sigma, t))
-print('Result is - Generalized formula of B&S - put:')
-print(mygput(s, k, r, b, sigma, t))
 
 
-# Isolate the `Adj Close` values and transform the DataFrame
-daily_close_px = all_data[['Adj Close']].reset_index().pivot('Date', 'Ticker', 'Adj Close')
+
+
+
+
+
+
+
+
+
+
