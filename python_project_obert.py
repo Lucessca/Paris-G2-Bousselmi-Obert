@@ -10,6 +10,7 @@ Created on Mon Feb 27 14:32:52 2023
 
 import pandas_datareader.data as pdr
 import yfinance as yf
+import nympy as np
 import matplotlib.pyplot as plt
 yf.pdr_override()
 from datetime import datetime
