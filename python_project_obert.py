@@ -429,17 +429,3 @@ portfolio['returns'] = portfolio['total'].pct_change()
 
 # Print the first lines of `portfolio`
 print(portfolio.head())
-
-
-
-
-
-
-
-
-
-
-
-
-
-
