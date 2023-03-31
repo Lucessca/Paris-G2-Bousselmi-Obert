@@ -1,0 +1,330 @@
+import pandas as pd
+import numpy as np
+import pandas_datareader.data as pdr
+import yfinance as yf
+yf.pdr_override()
+from datetime import datetime
+ 
+ 
+def get(tickers, startdate, enddate):
+    def data(ticker):
+        return pdr.get_data_yahoo(ticker, start=startdate, end=enddate)
+    datas = map (data, tickers)
+    return(pd.concat(datas, keys=tickers, names=['Ticker', 'Date']))
+ 
+tickers = ['AAPL', 'MSFT', 'IBM', 'GOOG']
+all_data = get(tickers, datetime(2012, 1, 1), datetime(2020, 1, 1))
+ 
+
+ 
+# Frequency Distributions on closing prices only - Exercise 2
+#------------------------------------------------------------------------------
+# Import matplotlib
+import matplotlib.pyplot as plt
+ 
+# Isolate the `Adj Close` values and transform the DataFrame
+daily_close_px = all_data[['Adj Close']].reset_index().pivot('Date', 'Ticker', 'Adj Close')
+ 
+# Calculate the daily percentage change for `daily_close_px`
+daily_pct_change = daily_close_px.pct_change()
+ 
+# Plot the distributions
+daily_pct_change.hist(bins=50, sharex=False, figsize=(12,8))
+#https://mode.com/example-gallery/python_histogram/
+ 
+# Show the resulting plot
+plt.show()
+ 
+ 
+ 
+# Moving average on closing prices only - Exercise 3
+#----------------------------------------------------------------------------
+ 
+import pandas_datareader.data as pdr
+import yfinance as yf
+yf.pdr_override()
+from datetime import datetime
+aapl = pdr.get_data_yahoo('AAPL',
+                          start=datetime(2006, 10, 1),  ##(yyyy, dd, mm)
+                          end=datetime(2012, 1, 1))     ##(yyyy, dd, mm)
+print(aapl)
+ 
+ 
+# Isolate the adjusted closing prices
+adj_close_px = aapl[['Adj Close']]
+ 
+# Calculate the moving average for aapl
+moving_avg = adj_close_px.rolling(window=40).mean()
+ 
+# Inspect the result
+print(moving_avg[-10:])
+ 
+ 
+# Short and long moving windows: rolling means - Exercise 4
+#---------------------------------------------------------------------
+ 
+# Short moving window rolling mean
+aapl['42'] = adj_close_px.rolling(window=40).mean()
+ 
+# Long moving window rolling mean
+aapl['252'] = adj_close_px.rolling(window=252).mean()
+ 
+# Plot the adjusted closing price, the short and long windows of rolling means
+aapl[['Adj Close', '42', '252']].plot()
+ 
+# Show plot
+plt.show()
+ 
+ 
+#aapl['42max'] = adj_close_px.rolling(window=40).max()
+#aapl['42min'] = adj_close_px.rolling(window=40).min()
+#aapl[['Adj Close', '42', '252', '42max', '42min']].plot()
+#plt.show()
+ 
+ 
+#Volatility calculation - Exercise 5
+#----------------------------------------------------------------------------
+# Import matplotlib
+import matplotlib.pyplot as plt
+ 
+# Define the minumum of periods to consider
+min_periods = 75
+ 
+# Calculate the volatility
+vol = daily_pct_change.rolling(min_periods).std() * np.sqrt(min_periods)
+ 
+# Plot the volatility
+vol.plot(figsize=(10, 8))
+ 
+# Show the plot
+plt.show()
+ 
+ 
+# OLS regression - Exercise 6
+#------------------------------------------------------------------------------
+# Import the `api` model of `statsmodels` under alias `sm`
+#! pip install datetools
+import statsmodels.api as sm
+ 
+# Import the `datetools` module from `pandas`
+# from pandas.core import datetools
+#If this does not work:
+#! pip install datetools
+# Isolate the adjusted closing price
+all_adj_close = all_data[['Adj Close']]
+ 
+# Calculate the returns
+all_returns = np.log(all_adj_close / all_adj_close.shift(1))
+ 
+# Isolate the AAPL returns
+aapl_returns = all_returns.iloc[all_returns.index.get_level_values('Ticker') == 'AAPL']
+# to drop index "Ticker"
+aapl_returns.index = aapl_returns.index.droplevel('Ticker')
+ 
+# Isolate the MSFT returns
+msft_returns = all_returns.iloc[all_returns.index.get_level_values('Ticker') == 'MSFT']
+msft_returns.index = msft_returns.index.droplevel('Ticker')
+ 
+# Build up a new DataFrame with AAPL and MSFT returns
+return_data = pd.concat([aapl_returns, msft_returns], axis=1)[1:]
+#[1:] to not get row 1 // axis=1 means take columns
+ 
+return_data.columns = ['AAPL', 'MSFT']       # rename columns
+ 
+# Add a constant
+X = sm.add_constant(return_data['AAPL'])
+ 
+# Construct the model
+model = sm.OLS(return_data['MSFT'],X).fit()
+ 
+# Print the summary
+print(model.summary())
+ 
+ 
+ 
+ 
+# Plotting the OLS Regression - Exercise 7
+#----------------------------------------------------------------------------
+# Import matplotlib
+import matplotlib.pyplot as plt
+ 
+# Plot returns of AAPL and MSFT
+plt.plot(return_data['AAPL'], return_data['MSFT'], 'r.')
+# 'r.' = color red
+ 
+# Add an axis to the plot
+ax = plt.axis()
+ 
+# Initialize `x`
+x = np.linspace(ax[0], ax[1] + 0.01)
+# x will help me to plot OLS regression // here x varies between min and max+0.01
+ 
+# Plot the regression line
+plt.plot(x, model.params[0] + model.params[1] * x, 'b', lw=2)
+# my OLS regression line : y = 0.0006 + 0.3791 * x
+# 'b' : color blue // lw=2 : line width
+ 
+# Customize the plot
+plt.grid(True)
+plt.axis('tight')  # axis are just large enough to show all data
+plt.xlabel('Apple Returns')
+plt.ylabel('Microsoft returns')
+ 
+# Show the plot
+plt.show()
+ 
+
+
+
+#SMA Strategy: creating signals - Exercise 8
+#-----------------------------------------------------------------------------
+# Initialize the short and long windows
+short_window = 40
+long_window = 100
+
+# Initialize the `signals` DataFrame with the `signal` column
+signals = pd.DataFrame(index=aapl.index)
+signals['signal'] = 0.0
+
+# Create short simple moving average over the short window
+signals['short_mavg'] = aapl['Close'].rolling(window=short_window, min_periods=1, center=False).mean()
+
+# Create long simple moving average over the long window
+signals['long_mavg'] = aapl['Close'].rolling(window=long_window, min_periods=1, center=False).mean()
+
+# Create signals
+signals['signal'][short_window:] = np.where(signals['short_mavg'][short_window:]
+                                            > signals['long_mavg'][short_window:], 1.0, 0.0)  
+
+# Generate trading orders
+signals['positions'] = signals['signal'].diff()
+
+# Print `signals`
+print(signals)
+
+# Plot your signals - Exercise 9
+#-----------------------------------------------------------------------------
+# Import `pyplot` module as `plt`
+import matplotlib.pyplot as plt
+
+# Initialize the plot figure
+fig = plt.figure()
+
+# Add a subplot and label for y-axis
+ax1 = fig.add_subplot(111,  ylabel='Price in $')
+
+# Plot the closing price
+aapl['Close'].plot(ax=ax1, color='r', lw=2.)
+
+# Plot the short and long moving averages
+signals[['short_mavg', 'long_mavg']].plot(ax=ax1, lw=2.)
+
+# Plot the buy signals (magenta)
+ax1.plot(signals.loc[signals.positions == 1.0].index,
+         signals.short_mavg[signals.positions == 1.0],
+         '^', markersize=10, color='m')
+         
+# Plot the sell signals (black)
+ax1.plot(signals.loc[signals.positions == -1.0].index,
+         signals.short_mavg[signals.positions == -1.0],
+         'v', markersize=10, color='k')
+         
+# Show the plot
+plt.show()
+
+# Backtesting a trading strategy - Exercise 10
+#-----------------------------------------------------------------------------
+# Set the initial capital
+initial_capital= float(100000.0)
+
+# Create a DataFrame `positions`
+positions = pd.DataFrame(index=signals.index).fillna(0.0)
+
+# Buy a 100 shares
+positions['AAPL'] = 100*signals['signal']  
+ 
+# Initialize the portfolio with value owned  
+portfolio = positions.multiply(aapl['Adj Close'], axis=0)
+
+# Store the difference in shares owned
+pos_diff = positions.diff()
+
+# Add `holdings` to portfolio
+portfolio['holdings'] = (positions.multiply(aapl['Adj Close'], axis=0)).sum(axis=1)
+
+# Add `cash` to portfolio
+portfolio['cash'] = initial_capital - (pos_diff.multiply(aapl['Adj Close'], axis=0)).sum(axis=1).cumsum()  
+
+# Add `total` to portfolio
+portfolio['total'] = portfolio['cash'] + portfolio['holdings']
+
+# Add `returns` to portfolio
+portfolio['returns'] = portfolio['total'].pct_change()
+
+# Print the first lines of `portfolio`
+print(portfolio.head())
+
+#Visualize your portfolio - Exercise 11
+#------------------------------------------------------------------------------
+# Import the `pyplot` module as `plt`
+import matplotlib.pyplot as plt
+
+# Create a figure
+fig = plt.figure()
+
+ax1 = fig.add_subplot(111, ylabel='Portfolio value in $')
+
+# Plot the equity curve in dollars
+portfolio['total'].plot(ax=ax1, lw=2.)
+
+ax1.plot(portfolio.loc[signals.positions == 1.0].index,
+         portfolio.total[signals.positions == 1.0],
+         '^', markersize=10, color='m')
+ax1.plot(portfolio.loc[signals.positions == -1.0].index,
+         portfolio.total[signals.positions == -1.0],
+         'v', markersize=10, color='k')
+
+# Show the plot
+plt.show()
+
+#Evaluating Moving Average Crossover Strategy - Exercise 12
+#-----------------------------------------------------------------------------
+# Isolate the returns of your strategy
+returns = portfolio['returns']
+
+# annualized Sharpe ratio
+sharpe_ratio = np.sqrt(252) * (returns.mean() / returns.std())
+
+# Print the Sharpe ratio
+print(sharpe_ratio)
+
+# Maximum drawdown - Exercise 13
+#-----------------------------------------------------------------------------
+# Define a trailing 252 trading day window
+window = 252
+
+# Calculate the max drawdown in the past window days for each day
+rolling_max = aapl['Adj Close'].rolling(window, min_periods=1).max()
+daily_drawdown = aapl['Adj Close']/rolling_max - 1.0
+
+# Calculate the minimum (negative) daily drawdown
+max_daily_drawdown = daily_drawdown.rolling(window, min_periods=1).min()
+
+# Plot the results
+daily_drawdown.plot()
+max_daily_drawdown.plot()
+
+# Show the plot
+plt.show()
+
+#Compound Annual Growth Rate (CAGR)- Exercise 14
+#-----------------------------------------------------------------------------
+# Get the number of days in `aapl`
+days = (aapl.index[-1] - aapl.index[0]).days
+
+# Calculate the CAGR
+cagr = ((((aapl['Adj Close'][-1]) / aapl['Adj Close'][1])) ** (365.0/days)) - 1
+
+# Print the CAGR
+print(cagr)
+
