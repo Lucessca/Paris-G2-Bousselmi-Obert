@@ -1,13 +1,23 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Sat Apr  1 12:12:55 2023
-
-@author: mathe
-"""
-
 #----------------------------------------------------------------------------------------------------------------#
 #    FINAL VERSION        PYTHON PROJECT
 #----------------------------------------------------------------------------------------------------------------#
+
+#Objective of this python code:
+#It will first calculate a short and long moving average. Then it will show the price evolution of the last 10 years for each stock but it will also plot the moving average
+#Then, we did a backtesting to see what was our portfolio performance if we bought 3500 stock of each stock.
+#Then we plot a graph of the performance of each stock for the last ten years but it also show all the buy and sell order.
+#During the next step, we calculated the average annual return of each stock
+#Finally, we calculated, for each stock, the value of one put european option (the objective of this is to cover your long) if you decide to invest today.
+
+#These package need to be installated
+#pip install pandas_datareader
+#pip install yfinance
+#pip install matplotlib
+#pip install pandas
+#pip install numpy
+#pip install scipy
+
+#Packages
 import pandas_datareader.data as pdr
 import yfinance as yf
 import matplotlib.pyplot as plt
@@ -19,10 +29,11 @@ from datetime import datetime
 from datetime import date
 from datetime import timedelta
 
-# Define variables
+# Define variables 
+#It is possible to test this strategy on any other code. To do so, you need to pick a ticker on Yahoo Finance. Then, you add the ticker name in the line below and it will automatically calculate the moving average, the average annual return and the value of one put european option to cover your long
 tickers = ['WMT', 'KO', 'SBUX', 'MCD']
-short_window = 42
-long_window = 200
+short_window = 20
+long_window = 100
 initial_capital= float(100000.0)
 
 # Loop through tickers and retrieve data
@@ -50,6 +61,12 @@ for tick in tickers:
     signals['positions'] = signals['signal'].diff()
 
     # ----- Ploting the signals and moving averages -----
+     
+     
+    # Show the plot
+    plt.show()
+ 
+
 
     # Initialize the plot figure
     fig = plt.figure()
@@ -67,7 +84,10 @@ for tick in tickers:
     # Plot the buy signals (magenta)
     ax1.plot(signals.loc[signals.positions == 1.0].index, signals.short_mavg[signals.positions == 1.0], '^', markersize=4, color='g')
     ax1.plot(signals.loc[signals.positions == -1.0].index, signals.short_mavg[signals.positions == -1.0], 'v', markersize=4, color='r')
-             
+       
+    # Customize the plot
+ 
+    plt.title(f"{tick} price evolution")      
     # Show the plot
     plt.show()
 
@@ -84,7 +104,7 @@ for tick in tickers:
     # Stop loss calculation
     SL = np.where(Merged_data['signal'] == 1.0, Merged_data['Adj Close'] * (1 - 0.2), 0.0)
 
-    # Buy a 5,000 shares
+    # Buy a 3500 shares
     positions[tick] = 3500*signals['signal']  
 
     # Initialize the portfolio with value owned
@@ -104,7 +124,7 @@ for tick in tickers:
 
     # Add `returns` to portfolio
     portfolio['returns'] = portfolio['total'].pct_change()
-
+    
     # Create a figure
     fig = plt.figure()
 
@@ -116,6 +136,9 @@ for tick in tickers:
     ax1.plot(portfolio.loc[signals.positions == 1.0].index, portfolio.total[signals.positions == 1.0], '^', markersize=4, color='g')
     ax1.plot(portfolio.loc[signals.positions == -1.0].index, portfolio.total[signals.positions == -1.0], 'v', markersize=4, color='r')
 
+    # Customize the plot
+
+    plt.title(f"{tick} portfolio performance")    
     # Show the plot
     plt.show()
 
