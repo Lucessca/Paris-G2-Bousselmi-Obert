@@ -9,7 +9,7 @@
 #During the next step, we calculated the average annual return of each stock
 #Finally, we calculated, for each stock, the value of one put european option (the objective of this is to cover your long) if you decide to invest today.
 
-#These package need to be installated
+#These packages need to be installated
 #pip install pandas_datareader
 #pip install yfinance
 #pip install matplotlib
@@ -30,7 +30,7 @@ from datetime import date
 from datetime import timedelta
 
 # Define variables 
-#It is possible to test this strategy on any other code. To do so, you need to pick a ticker on Yahoo Finance. Then, you add the ticker name in the line below and it will automatically calculate the moving average, the average annual return and the value of one put european option to cover your long
+#It is possible to apply this strategy on any other stock. To do so, you need to pick a ticker on Yahoo Finance. Then, you add the ticker name in the line below and it will automatically calculate the moving average, the average annual return and the value of one put european option to cover your long.
 tickers = ['WMT', 'KO', 'SBUX', 'MCD']
 short_window = 20
 long_window = 100
