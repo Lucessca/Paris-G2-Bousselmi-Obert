@@ -21,8 +21,8 @@ from datetime import timedelta
 
 # Define variables
 tickers = ['WMT', 'KO', 'SBUX', 'MCD']
-short_window = 7
-long_window = 21
+short_window = 42
+long_window = 200
 initial_capital= float(100000.0)
 
 # Loop through tickers and retrieve data
@@ -31,7 +31,7 @@ for tick in tickers:
 
     # ----- Retrieve data -----
 
-    data = pdr.get_data_yahoo(tick, start=datetime(2000, 1, 1), end=datetime(2023, 1, 3))
+    data = pdr.get_data_yahoo(tick, start=datetime(2013, 1, 1), end=datetime(2023, 1, 3))
 
     # ----- Signals creation -----
 
@@ -85,7 +85,7 @@ for tick in tickers:
     SL = np.where(Merged_data['signal'] == 1.0, Merged_data['Adj Close'] * (1 - 0.2), 0.0)
 
     # Buy a 5,000 shares
-    positions[tick] = 5000*signals['signal']  
+    positions[tick] = 3500*signals['signal']  
 
     # Initialize the portfolio with value owned
     portfolio = pd.DataFrame(positions).multiply(Merged_data['Adj Close'], axis=0)
@@ -182,13 +182,13 @@ for tick in tickers:
     print(' ')
     print(' ')
     print('*----------------------------------------------------------------------------------------------------------------*')
-    print('REPORT - Analysis since 2000')
+    print('REPORT - Analysis since 2013')
     print('*----------------------------------------------------------------------------------------------------------------*')
     print(' ')
     print('For ticker:')
     print(tick)
     print(' ')
-    print('The average annual return with 5,000 shares was:')
+    print('The average annual return with 3,5000 shares was and a beginning portfolio value of 100,000:')
     print(ANNUAL)
     print(' ')
     print('If you decided to invest in it today the value of one put european option, to cover your long, is:')
