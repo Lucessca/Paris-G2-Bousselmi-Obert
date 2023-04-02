@@ -2,6 +2,8 @@
 #    FINAL VERSION        PYTHON PROJECT
 #----------------------------------------------------------------------------------------------------------------#
 
+#Group member: Mathéo Langlais, Luc Obert, Benjamin Morlot, Quentin Le Gangneux & Martin Bouteleux
+
 #Objective of this python code:
 #It will first calculate a short and long moving average. Then it will show the price evolution of the last 10 years for each stock but it will also plot the moving average
 #Then, we did a backtesting to see what was our portfolio performance if we bought 3500 stock of each stock.
